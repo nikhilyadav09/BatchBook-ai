@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  passwordHash String
+  avatar      String?
+  bio         String?
+  dateOfBirth DateTime?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  memories      Memory[]
+  batches       BatchMember[]
+  comments      Comment[]
+  reactions     Reaction[]
+  notifications Notification[]
+  createdBatches Batch[] @relation("BatchCreator")
+  sentInvitations     BatchInvitation[] @relation("SentInvitations")
+  receivedInvitations BatchInvitation[] @relation("ReceivedInvitations")
+
+  @@map("users")
+}
+
+model OTP {
+  id         String   @id @default(cuid())
+  identifier String   @unique // email or phone
+  code       String
+  type       String   @default("email") // email or sms
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  isUsed     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@map("otps")
+}
+
+model Batch {
+  id           String   @id @default(cuid())
+  name         String
+  academicYear String
+  institution  String
+  description  String?
+  avatar       String?
+  isPrivate    Boolean  @default(false)
+  inviteCode   String   @unique @default(cuid())
+  createdById  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  creator     User          @relation("BatchCreator", fields: [createdById], references: [id])
+  members     BatchMember[]
+  memories    Memory[]
+  invitations BatchInvitation[]
+
+  @@map("batches")
+}
+
+model BatchMember {
+  id       String @id @default(cuid())
+  userId   String
+  batchId  String
+  role     Role   @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  // Relationships
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batch Batch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, batchId])
+  @@map("batch_members")
+}
+
+model Memory {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  mediaUrls   String[]     @default([])
+  category    Category     @default(GENERAL)
+  aiCaption   String?
+  tags        String[]     @default([])
+  status      MemoryStatus @default(ACTIVE)
+  location    String?
+  createdById String
+  batchId     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relationships
+  creator   User        @relation(fields: [createdById], references: [id])
+  batch     Batch?      @relation(fields: [batchId], references: [id])
+  comments  Comment[]
+  reactions Reaction[]
+
+  @@map("memories")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  memoryId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memory Memory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Reaction {
+  id       String      @id @default(cuid())
+  type     ReactionType
+  userId   String
+  memoryId String
+  createdAt DateTime   @default(now())
+
+  // Relationships
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memory Memory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, memoryId])
+  @@map("reactions")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String
+  userId    String
+  isRead    Boolean          @default(false)
+  metadata  Json?            // Additional data like memoryId, batchId, etc.
+  createdAt DateTime         @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model BatchInvitation {
+  id         String   @id @default(cuid())
+  batchId    String
+  senderId   String
+  receiverId String
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  // Relationships
+  batch    Batch  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  sender   User   @relation("SentInvitations", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User   @relation("ReceivedInvitations", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("batch_invitations")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+enum Category {
+  GENERAL
+  ACADEMIC
+  SPORTS
+  CULTURAL
+  GRADUATION
+  REUNION
+  FAREWELL
+  FESTIVAL
+  TRIP
+  ACHIEVEMENT
+}
+
+enum MemoryStatus {
+  ACTIVE
+  ARCHIVED
+  HIDDEN
+  FLAGGED
+}
+
+enum ReactionType {
+  LIKE
+  HEART
+  LAUGH
+  WOW
+  SAD
+  ANGRY
+}
+
+enum NotificationType {
+  MEMORY_LIKE
+  MEMORY_COMMENT
+  BATCH_INVITE
+  BATCH_JOIN
+  SYSTEM_UPDATE
+  MEMORY_MENTION
+}

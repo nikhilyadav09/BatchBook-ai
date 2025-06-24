@@ -1,31 +1,58 @@
-import { useState } from 'react'
+// Step 1: Install React Router (if not installed)
+// npm install react-router-dom
+// npm install -D @types/react-router-dom
+
+// Step 2: client/src/App.tsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import AppLayout from './components/layout/AppLayout';
+import { Outlet } from 'react-router-dom';
+import './App.css';
+
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import GuestRoute from './components/auth/GuestRoute';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import HomePage from './pages/HomePage';
+import MemoriesPage from './pages/memory/MemoriesPage';
+
+// Create the test component first
+import AuthTest from './components/AuthTest';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          BatchBook AI
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Memory Sharing Platform
-        </p>
-        <div className="space-y-4">
-          <button
-            onClick={() => setCount((count) => count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+          </Route>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <Outlet />
+                </AppLayout>
+              </ProtectedRoute>
+            }
           >
-            Count is {count}
-          </button>
-          <p className="text-sm text-gray-500">
-            🚀 Client is running successfully!
-          </p>
-        </div>
-      </div>
-    </div>
-  )
+            <Route index element={<HomePage />} />
+            <Route path="memories" element={<MemoriesPage />} />
+            {/* Add other protected routes here, for example: */}
+            {/* <Route path="dashboard" element={<Dashboard />} /> */}
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
+// Helper to wrap AppLayout and render Outlet
+function AppLayoutWrapper() {
+  return <AppLayout><Outlet /></AppLayout>;
+}
+
+export default App;

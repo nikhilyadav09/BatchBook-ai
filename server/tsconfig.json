@@ -1,35 +1,50 @@
 {
-    "compilerOptions": {
-      "target": "ES2020",
-      "module": "commonjs",
-      "lib": ["ES2020"],
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "resolveJsonModule": true,
-      "declaration": true,
-      "declarationMap": true,
-      "sourceMap": true,
-      "removeComments": true,
-      "noImplicitAny": true,
-      "noImplicitReturns": true,
-      "noImplicitThis": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "exactOptionalPropertyTypes": true,
-      "baseUrl": ".",
-      "paths": {
-        "@/*": ["./src/*"],
-        "@/controllers/*": ["./src/controllers/*"],
-        "@/services/*": ["./src/services/*"],
-        "@/utils/*": ["./src/utils/*"],
-        "@/types/*": ["./src/types/*"],
-        "@/config/*": ["./src/config/*"]
-      }
-    },
-    "include": ["src/**/*", "prisma/**/*"],
-    "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "src/**/*",
+    "prisma/seed.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "ts-node": {
+    "esm": true
   }
+}
